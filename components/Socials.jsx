@@ -7,10 +7,10 @@ function Socials() {
       <SocialMediaLink link="https://www.linkedin.com/in/zhihao-lin1/">
         <Linkedin />
       </SocialMediaLink>
-      <SocialMediaLink link="https://github.com/eurooooo/">
+      <SocialMediaLink link="https://github.com/XD0N">
         <Github />
       </SocialMediaLink>
-      <SocialMediaLink link="mailto:lzh910954163@gmail.com">
+      <SocialMediaLink link="mailto:xdon_y@163.com">
         <Mail />
       </SocialMediaLink>
     </div>
