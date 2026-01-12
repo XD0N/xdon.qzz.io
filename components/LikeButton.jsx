@@ -2,7 +2,10 @@
 
 import { toggleLike } from "@/app/actions";
 import { Heart } from "lucide-react";
-import { useOptimistic } from "react"; // 1. 引入这个 Hook
+import { useOptimistic, useEffect, useState } from "react"; 
+import { useLanguageStore } from "@/lib/store";
+import { dictionary } from "@/lib/dictionary";
+import { cn } from "@/lib/utils"; // 🚀 引入 cn 工具函数
 
 export default function LikeButton({
   messageId,
@@ -11,15 +14,20 @@ export default function LikeButton({
   currentSlug,
   likeCount,
   isLiked,
+  className, // 🚀 接收外部传入的样式，用于控制字体大小
 }) {
-  // 2. 定义乐观状态
-  // optimisticState 是当前显示的状态，addOptimistic 是用来更新它的函数
+  const { lang } = useLanguageStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const t = mounted ? (dictionary[lang]?.comment || dictionary.en.comment) : dictionary.en.comment;
+
   const [optimisticState, addOptimistic] = useOptimistic(
-    { likeCount, isLiked }, // 初始状态（来自服务器）
+    { likeCount, isLiked },
     (state, newLikeStatus) => {
-      // 这是“乐观”的计算逻辑：
-      // 如果本来是赞(true)，现在变成没赞(false)，数量就 -1
-      // 如果本来没赞(false)，现在变成赞(true)，数量就 +1
       return {
         isLiked: !state.isLiked,
         likeCount: state.isLiked ? state.likeCount - 1 : state.likeCount + 1,
@@ -30,10 +38,7 @@ export default function LikeButton({
   return (
     <form
       action={async (formData) => {
-        // A. 先立即更新 UI (不用等服务器)
         addOptimistic(!optimisticState.isLiked);
-        
-        // B. 然后再慢慢发请求给服务器
         toggleLike(formData);
       }}
     >
@@ -44,18 +49,22 @@ export default function LikeButton({
 
       <button
         type="submit"
-        className={`flex items-center gap-1.5 transition-colors duration-200 ${
-          optimisticState.isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"
-        }`}
+        className={cn(
+          "flex items-center gap-1 transition-colors duration-200",
+          // 🚀 默认 text-xs，或者使用传入的字体大小（如 text-[10px]）
+          className ? className : "text-[12px] text-muted-foreground hover:text-foreground font-medium", 
+          optimisticState.isLiked ? "text-red-500 font-medium" : "text-muted-foreground hover:text-red-500"
+        )}
       >
         <Heart
-          size={18}
-          // 使用乐观状态来控制实心/空心
-          className={`${optimisticState.isLiked ? "fill-current" : ""}`}
+          size={14} 
+          className={cn(optimisticState.isLiked ? "fill-current" : "")}
         />
-        {/* 使用乐观状态来显示数字 */}
-        <span className="text-sm font-medium">
-          {optimisticState.likeCount > 0 ? optimisticState.likeCount : "赞"}
+        {/* 🚀 确保这里的行高和回复文字一致 */}
+        <span className="leading-none">
+          {optimisticState.likeCount > 0 
+            ? optimisticState.likeCount 
+            : (optimisticState.isLiked ? t?.liked : t?.like)}
         </span>
       </button>
     </form>

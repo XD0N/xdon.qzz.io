@@ -1,17 +1,19 @@
 "use client";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguageStore } from "@/lib/store";
+import { dictionary } from "@/lib/dictionary";
 import { useFormStatus } from "react-dom";
 import { useState } from "react";
 import { createMessage } from "@/app/actions";
 import TextareaAutosize from "react-textarea-autosize";
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-// 🚀 1. 增加 parentId 和 onFinished 两个 props
-export default function MessageForm({ children, parentId = null, onFinished }) {
+export default function MessageForm({ children, parentId = null, onFinished, autoFocus = false }) {
   const [text, setText] = useState("");
-  const isEmpty = text === "";
-  const t = useTranslation('messageform');
+  const { lang } = useLanguageStore();
+  
+  const tForm = dictionary[lang]?.messageform || dictionary.en.messageform;
+  const tInput = dictionary[lang]?.messageinput || dictionary.en.messageinput;
 
   return (
     <form
@@ -19,56 +21,51 @@ export default function MessageForm({ children, parentId = null, onFinished }) {
         try {
           await createMessage(formData);
           setText("");
-          toast.success(t.success);
-          // 🚀 2. 如果存在 onFinished（说明是回复框），提交成功后关闭它
+          toast.success(tForm.success);
           if (onFinished) onFinished(); 
         } catch (error) {
-          toast.error(error.message || t.error);
+          toast.error(error.message || tForm.error);
         }
       }}
+      className="w-full"
     >
-      {/* 🚀 3. 核心修复：添加隐藏的 input，把 parentId 传给后端 */}
       <input type="hidden" name="parentId" value={parentId || ""} />
-
-      <div className="flex gap-2 rounded-md shadow-[0_0px_1.2px_rgb(140,140,140)] p-3 min-h-20 ">
-        <div className="w-12 h-12 shrink-0">{children}</div>
-        <MessageInput text={text} setText={setText} isEmpty={isEmpty} isReply={!!parentId} />
+      <div className={`flex gap-3 p-2 rounded-lg transition-all ${parentId ? "bg-transparent" : "bg-card/50 border border-muted/60 shadow-sm"}`}>
+        <div className="shrink-0 pt-1">{children}</div>
+        <div className="flex flex-col flex-grow gap-2">
+          <TextareaAutosize
+            className="w-full py-2 text-sm bg-transparent border-none outline-none resize-none placeholder:text-muted-foreground/60 text-foreground"
+            // 🚀 修复：回复时显示回复占位符
+            placeholder={parentId ? (tInput.replyPlaceholder || "Reply...") : tInput.placeholder}
+            name="message"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            maxLength={500}
+            autoFocus={autoFocus}
+          />
+          <div className="flex items-center justify-between border-t border-muted/30 pt-2 mt-1">
+            <span className={`text-[10px] transition-opacity ${text.length === 0 ? "opacity-0" : "opacity-50"}`}>
+              {text.length} / 500
+            </span>
+            <SubmitButton t={tInput} isReply={!!parentId} isEmpty={text.trim() === ""} />
+          </div>
+        </div>
       </div>
     </form>
   );
 }
 
-function MessageInput({ text, setText, isEmpty, isReply }) {
+function SubmitButton({ t, isReply, isEmpty }) {
   const { pending } = useFormStatus();
-  const t = useTranslation('messageinput');
-
   return (
-    <div className="flex flex-col flex-grow gap-4 justify-between">
-      <TextareaAutosize
-        disabled={pending}
-        className="p-0 w-full text-sm bg-transparent border-none outline-none resize-none placeholder-muted-foreground text-muted-foreground disabled:opacity-50"
-        // 🚀 根据是否是回复动态切换占位符
-        placeholder={isReply ? "写下你的回复..." : t.placeholder}
-        name="message"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        maxLength={500}
-        autoFocus={isReply} // 回复时自动聚焦
-      />
-
-      <div
-        className={`${isEmpty ? "opacity-0" : "opacity-100"} transition-opacity duration-1000 text-xs text-muted-foreground flex items-center justify-between gap-2`}
-      >
-        <span>{text.length}/500 </span>
-        <button
-          disabled={pending || isEmpty}
-          type="submit"
-          className="flex items-center justify-center gap-1.5"
-        >
-          <Send size={15} />
-          <span className="font-bold">{isReply ? "回复" : t.send}</span>
-        </button>
-      </div>
-    </div>
+    <button
+      disabled={pending || isEmpty}
+      type="submit"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 disabled:opacity-50 transition-all"
+    >
+      {pending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+      {/* 🚀 修复：回复时显示“回复”，否则显示“发送” */}
+      {isReply ? (t.reply || "Reply") : t.send}
+    </button>
   );
 }
