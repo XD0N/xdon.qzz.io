@@ -29,26 +29,22 @@ export async function createComment(formData) {
   const user = await currentUser();
   if (!user) throw new Error("Unauthorized");
 
-  // 1. 获取前端表单的数据
-  // 注意：这里必须和前端组件 <input name="..."> 的 name 属性一致
-  const text = formData.get("text"); 
-  const slug = formData.get("postSlug"); 
+  const text = formData.get("text");
+  const slug = formData.get("postSlug");
+  const parentId = formData.get("parentId"); // 👈 获取 parentId
 
   await prisma.comment.create({
     data: {
-      // 👇 关键修改：左边是数据库字段名(content)，右边是变量名(text)
-      content: text, 
-      
-      // 👇 关键修改：左边是数据库字段名(blogSlug)，右边是变量名(slug)
-      blogSlug: slug, 
-      
+      content: text,
+      blogSlug: slug,
       userId: user.id,
       userName: user.username || user.firstName,
       userImg: user.imageUrl,
+      // 👇 如果有 parentId 就存进去，没有就是 undefined (即 null)
+      parentId: parentId || undefined, 
     },
   });
   
-  // 刷新页面
   revalidatePath(`/blog/${slug}`); 
 }
 

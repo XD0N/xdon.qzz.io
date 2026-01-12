@@ -23,6 +23,7 @@ model Message {
 
   // 👇 新增：关联 Like 表，让留言可以被点赞
   likes     Like[]
+  
 }
 
 // 2. 博客评论 (Blog Comments)
@@ -41,6 +42,11 @@ model Comment {
 
   // 👇 修改：这里关联的是通用的 Like 表，而不是 CommentLike
   likes     Like[]
+
+  // 👇 新增：父子关系
+  parentId  String?  // 如果是顶层评论，这里是 null；如果是回复，这里存父评论 ID
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies") // 一条评论可以有多个回复
 }
 
 // 3. 通用点赞表 (Universal Like System)
