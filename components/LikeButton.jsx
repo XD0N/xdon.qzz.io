@@ -34,7 +34,7 @@ export default function LikeButton({
         addOptimistic(!optimisticState.isLiked);
         
         // B. 然后再慢慢发请求给服务器
-        await toggleLike(formData);
+        toggleLike(formData);
       }}
     >
       <input type="hidden" name="messageId" value={messageId || ""} />
