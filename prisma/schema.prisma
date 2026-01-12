@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,11 +11,59 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// 1. 留言板 (Guestbook)
 model Message {
   id        String   @id @default(uuid())
   message   String
   createdAt DateTime @default(now())
+  
   userId    String
   userName  String
-  userImg   String
+  userImg   String?
+
+  // 👇 新增：关联 Like 表，让留言可以被点赞
+  likes     Like[]
+}
+
+// 2. 博客评论 (Blog Comments)
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   // 评论内容
+  createdAt DateTime @default(now())
+  
+  // 博客标识 (对应 Sanity/文章文件的 slug)
+  blogSlug  String   
+
+  // 评论者信息 (从 Clerk 获取)
+  userId    String
+  userName  String
+  userImg   String?
+
+  // 👇 修改：这里关联的是通用的 Like 表，而不是 CommentLike
+  likes     Like[]
+}
+
+// 3. 通用点赞表 (Universal Like System)
+// 这张表替代了你之前的 BlogLike 和 CommentLike
+model Like {
+  id        String   @id @default(uuid())
+  userId    String   // 点赞人的 Clerk ID
+
+  // --- 场景 A: 给留言板点赞 ---
+  messageId String?
+  message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  // --- 场景 B: 给博客文章点赞 ---
+  // 文章本身不在数据库里，所以直接存 slug
+  blogSlug  String?  
+
+  // --- 场景 C: 给评论点赞 ---
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  // --- 唯一性约束 (防止重复点赞) ---
+  // 确保同一个用户在同一场景下只能点一次赞
+  @@unique([userId, messageId]) // 留言板防刷
+  @@unique([userId, blogSlug])  // 文章防刷
+  @@unique([userId, commentId]) // 评论防刷
 }
