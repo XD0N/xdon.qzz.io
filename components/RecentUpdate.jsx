@@ -1,13 +1,19 @@
+"use client"; // 👈 1. 必须变身客户端组件
+
+import { useTranslation } from "@/hooks/useTranslation"; // 👈 2. 引入翻译钩子
 import { Newspaper } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function RecentUpdate({ blogs }) {
+  const t = useTranslation('recentUpdate'); // 👈 3. 获取 'recentUpdate' 分类的翻译
+
   return (
     <div className="mt-10">
       <div className="flex items-center justify-start w-full gap-3 mb-10">
         <Newspaper />
-        <span className="text-lg font-semibold">Recent Update</span>
+        {/* 👇 这里的文字变成动态的了 */}
+        <span className="text-lg font-semibold">{t.title}</span>
       </div>
       <ul className="grid w-full grid-cols-1 gap-10">
         {blogs.map((blog) => (
@@ -27,6 +33,7 @@ export default function RecentUpdate({ blogs }) {
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-4 rounded-lg backdrop-blur-3xl">
+                  {/* 注意：博客标题(title)和摘要(summary)来自数据库，通常保持原样，不翻译 */}
                   <h2 className="mb-2 font-bold">{blog.title}</h2>
                   <p className="mb-4 text-sm text-muted-foreground">
                     {blog.publishedAt ?? ""} | {blog.tag}

@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/hooks/useTranslation";
 import CSSIcon from "@/public/icons/CSSIcon";
 import ExpressIcon from "@/public/icons/ExpressIcon";
 import HtmlIcon from "@/public/icons/HtmlIcon";
@@ -16,11 +18,13 @@ import SupabaseIcon from "@/public/icons/SupabaseIcon";
 import TailwindIcon from "@/public/icons/TailwindIcon";
 import ViteIcon from "@/public/icons/ViteIcon";
 
+
 export default function SkillsBar() {
+  const t = useTranslation('skills');
   return (
     <div className="flex flex-col w-full gap-6 px-6 py-4 shadow-[0_0px_1.2px_rgb(140,140,140)] rounded-lg ">
       <h2 className="text-lg">
-        ⚙️ <span className="text-green-200 opacity-60">Tech Stack</span>
+        ⚙️ <span className="text-green-200 opacity-60">{t.title}</span>
       </h2>
       <div className="flex flex-col items-center justify-center gap-5">
         <div className="flex justify-between w-full">

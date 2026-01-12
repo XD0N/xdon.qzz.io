@@ -1,15 +1,30 @@
 "use client";
 
 import { motion } from "framer-motion";
-export default function Description({ page, description }) {
+import { useTranslation } from "@/hooks/useTranslation";
+
+export default function Description({ page }) {
+  const tTitles = useTranslation('pageTitles');
+  const tDescs = useTranslation('pageDescriptions');
+
+  // 把传入的 page (如 "Message") 转成小写 key (如 "message")
+  const key = page?.toLowerCase() || "";
+
   return (
-    <section className="w-full">
-      <h1 className="text-4xl font-semibold ">{page}</h1>
-      {/* <p
-        className={`${page === "Blog" ? "lg:w-1/2" : "xl:w-2/3"} font-normal  w-full text-transparent bg-gradient-to-b to-muted-foreground to-70% from-foreground bg-clip-text`}
-      >
-        {description}
-      </p> */}
-    </section>
+    <motion.section 
+      initial={{ y: 30, opacity: 0 }} 
+      animate={{ y: 0, opacity: 1 }} 
+      className="w-full"
+    >
+      {/* 标题 */}
+      <h1 className="text-4xl font-semibold ">
+        {tTitles[key] || page}
+      </h1>
+      
+      {/* 描述/副标题 */}
+      <p className="font-light mt-2 text-muted-foreground">
+        {tDescs[key] || ""}
+      </p>
+    </motion.section>
   );
 }

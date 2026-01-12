@@ -1,5 +1,5 @@
 "use client";
-
+import { useTranslation } from "@/hooks/useTranslation";
 import { useFormStatus } from "react-dom";
 import { useState } from "react";
 import { createMessage } from "@/app/actions";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 export default function MessageForm({ children }) {
   const [text, setText] = useState("");
   const isEmpty = text === "";
+  const t = useTranslation('messageform');
 
   return (
     <form
@@ -17,9 +18,9 @@ export default function MessageForm({ children }) {
         try {
           await createMessage(formData);
           setText("");
-          toast.success("Message sent successfully");
+          toast.success(t.success);
         } catch (error) {
-          toast.error(error.message || "Failed to send message");
+          toast.error(error.message || t.error);
         }
       }}
     >
@@ -34,13 +35,14 @@ export default function MessageForm({ children }) {
 // New component to properly use useFormStatus
 function MessageInput({ text, setText, isEmpty }) {
   const { pending } = useFormStatus();
+  const t = useTranslation('messageinput');
 
   return (
     <div className="flex flex-col flex-grow gap-4 justify-between">
       <TextareaAutosize
         disabled={pending}
         className="p-0 w-full text-sm bg-transparent border-none outline-none resize-none placeholder-muted-foreground text-muted-foreground disabled:opacity-50"
-        placeholder="Leave a message"
+        placeholder={t.placeholder}
         name="message"
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -57,7 +59,7 @@ function MessageInput({ text, setText, isEmpty }) {
           className="flex items-center justify-center gap-1.5"
         >
           <Send size={15} />
-          <span className="font-bold">Send</span>
+          <span className="font-bold">{t.send}</span>
         </button>
       </div>
     </div>
