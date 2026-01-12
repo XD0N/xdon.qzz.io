@@ -13,17 +13,19 @@ datasource db {
 
 // 1. 留言板 (Guestbook)
 model Message {
-  id        String   @id @default(uuid())
+  id        String    @id @default(cuid())
   message   String
-  createdAt DateTime @default(now())
-  
   userId    String
   userName  String
-  userImg   String?
-
-  // 👇 新增：关联 Like 表，让留言可以被点赞
-  likes     Like[]
+  userImg   String
+  createdAt DateTime  @default(now())
   
+  // 👇 核心改动：增加父子关联
+  parentId  String?
+  parent    Message?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Message[] @relation("MessageReplies")
+  
+  likes     Like[] // 支持留言点赞
 }
 
 // 2. 博客评论 (Blog Comments)

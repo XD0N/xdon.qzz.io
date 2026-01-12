@@ -13,15 +13,20 @@ export async function createMessage(formData) {
   const user = await currentUser();
   if (!user) throw new Error("Unauthorized");
 
+  const text = formData.get("message");
+  const parentId = formData.get("parentId") || null; // 👈 获取父ID
+
   await prisma.message.create({
     data: {
-      message: formData.get("message"),
+      message: text,
       userId: user.id,
       userName: user.username || user.firstName,
       userImg: user.imageUrl,
+      parentId: parentId || undefined, // 👈 存入父ID
     },
   });
-  revalidatePath("/guestbook"); // 请修改为你留言板的实际路径
+  
+  revalidatePath("/guestbook");
 }
 
 // B. 👇 新增：创建文章评论
