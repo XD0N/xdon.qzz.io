@@ -76,6 +76,9 @@ export default async function Blog({ params }) {
     username: clerkUser.username,
   } : null;
 
+  // 从环境变量读取管理员权限
+  const isAdmin = user && process.env.ADMIN_USER_ID?.split(',').includes(user.id);
+
   const { postLikes, comments } = await getBlogData(slug);
   const isPostLiked = postLikes.some(l => l.userId === user?.id);
   const { metadata, content } = blog;
@@ -116,17 +119,30 @@ export default async function Blog({ params }) {
           <div className="mb-12">
             {user ? (
               <div className="flex items-start gap-4">
-                <Image src={user.imageUrl} width={40} height={40} className="rounded-full" alt="avatar"/>
+                {/* 修复：增加 aspect-square 和 object-cover 防止拉长 */}
+                <Image 
+                  src={user.imageUrl} 
+                  width={40} height={40} 
+                  className="rounded-full aspect-square object-cover flex-shrink-0" 
+                  alt="avatar"
+                />
                 <div className="flex-1">
                   <p className="text-sm font-medium mb-1">{user.firstName}</p>
-                  {/* 👇 主评论框：设为 false，防止页面加载自动跳转 */}
                   <CommentForm slug={slug} autoFocus={false} />
                 </div>
               </div>
             ) : <p className="text-center text-muted-foreground">请登录后参与讨论</p>}
           </div>
           <div className="space-y-8">
-            {comments.map(c => <CommentItem key={c.id} comment={c} user={user} slug={slug} />)}
+            {comments.map(c => (
+              <CommentItem 
+                key={c.id} 
+                comment={c} 
+                user={user} 
+                slug={slug} 
+                isAdmin={isAdmin} 
+              />
+            ))}
           </div>
         </section>
       </article>

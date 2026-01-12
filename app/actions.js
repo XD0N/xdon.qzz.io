@@ -48,6 +48,37 @@ export async function createComment(formData) {
   revalidatePath(`/blog/${slug}`); 
 }
 
+export async function deleteComment(commentId) {
+  const user = await currentUser();
+  if (!user) throw new Error("Unauthorized: 请先登录");
+
+  // 1. 获取环境变量中的管理员 ID 列表
+  const adminIds = process.env.ADMIN_USER_ID?.split(",") || [];
+
+  // 2. 查找评论
+  const comment = await prisma.comment.findUnique({
+    where: { id: commentId },
+  });
+
+  if (!comment) throw new Error("评论不存在");
+
+  // 3. 严格权限校验：是评论作者 OR 是管理员
+  const isOwner = comment.userId === user.id;
+  const isAdmin = adminIds.includes(user.id);
+
+  if (!isOwner && !isAdmin) {
+    throw new Error("Forbidden: 你没有权限删除此评论");
+  }
+
+  // 4. 执行删除 (Prisma 会根据 schema 配置处理级联删除)
+  await prisma.comment.delete({
+    where: { id: commentId },
+  });
+
+  revalidatePath(`/blog/${comment.blogSlug}`);
+  return { success: true };
+}
+
 // ==========================================
 // 2. 删除内容 (管理员)
 // ==========================================
