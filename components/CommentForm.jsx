@@ -2,7 +2,7 @@
 
 import { createComment } from "@/app/actions";
 import { useFormStatus } from "react-dom";
-import { useState } from "react"; // 引入 useState
+import { useState } from "react";
 
 function SubmitButton({ label }) {
   const { pending } = useFormStatus();
@@ -17,9 +17,14 @@ function SubmitButton({ label }) {
   );
 }
 
-// 👇 新增 initialValue 属性
-export default function CommentForm({ slug, parentId, onFinished, placeholder, initialValue = "" }) {
-  // 使用 state 来管理输入框内容，以便支持初始值
+export default function CommentForm({ 
+  slug, 
+  parentId, 
+  onFinished, 
+  placeholder, 
+  initialValue = "", 
+  autoFocus = false // 👈 进阶建议：默认不聚焦
+}) {
   const [text, setText] = useState(initialValue);
 
   return (
@@ -27,7 +32,7 @@ export default function CommentForm({ slug, parentId, onFinished, placeholder, i
       action={async (formData) => {
         await createComment(formData);
         if (onFinished) onFinished();
-        setText(""); // 提交后清空
+        setText(""); 
       }} 
       className="flex flex-col gap-3 mt-4"
     >
@@ -36,12 +41,12 @@ export default function CommentForm({ slug, parentId, onFinished, placeholder, i
       
       <textarea
         name="text"
-        value={text} // 绑定 state
+        value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={placeholder || "写下你的想法..."}
         className="w-full min-h-[80px] p-3 text-sm bg-transparent border rounded-md border-muted focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         required
-        autoFocus // 打开时自动聚焦
+        autoFocus={autoFocus} // 👈 根据传入属性决定是否聚焦
       />
       <div className="flex justify-end">
         <SubmitButton label={parentId ? "回复" : "发表评论"} />
