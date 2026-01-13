@@ -38,7 +38,7 @@ export default function Header() {
           className="flex items-center justify-center px-2 py-1 text-xs font-bold transition-all border border-gray-600 rounded-md hover:border-white hover:bg-white hover:text-black"
         >
           {/* 如果还没加载完，默认显示 CN (或者空)，防止闪烁 */}
-          {mounted ? (lang === "en" ? "CN" : "EN") : "CN"}
+          {mounted ? (lang === "en" ? "中文" : "English") : "中文"}
         </button>
 
         <Link
