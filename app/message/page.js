@@ -1,3 +1,5 @@
+export const revalidate = 60;
+
 import MessageForm from "@/components/MessageForm";
 import { currentUser } from "@clerk/nextjs/server";
 import { Suspense } from "react";

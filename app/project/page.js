@@ -1,3 +1,5 @@
+export const revalidate = 60; // 每 60 秒在后台更新一次缓存，而不是每次点击都查库
+
 import Projects from "@/components/Projects";
 
 import Description from "@/components/Description";
