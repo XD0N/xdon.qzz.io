@@ -32,7 +32,7 @@ export default async function Page() {
           <SkillsBar />
           <Suspense fallback={<Skeleton />}>
             {/* <Spotify /> */}  {/* 👈 加上花括号和注释符号，让它失效 */}
-            <p>正在听的歌：(Spotify 接口维护中...)</p> {/* 👈 可选：写个占位符 */}
+            <p>{/*正在听的歌：(Spotify 接口维护中...)*/}</p> {/* 👈 可选：写个占位符 */}
           </Suspense>
         </aside>
       </section>
