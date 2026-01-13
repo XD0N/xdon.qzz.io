@@ -88,14 +88,30 @@ export async function deleteComment(commentId) {
 // 2. 删除内容 (管理员)
 // ==========================================
 
-export async function deleteMessage(formData) {
+export async function deleteMessage(id) { // 改为直接接收 id
   const user = await currentUser();
-  if (!user || user.id !== process.env.ADMIN_USER_ID) throw new Error("Unauthorized");
+  if (!user) throw new Error("Unauthorized");
 
-  await prisma.message.delete({ where: { id: formData.get("messageId") } });
+  // 1. 先查找该留言
+  const message = await prisma.message.findUnique({
+    where: { id }
+  });
+
+  if (!message) throw new Error("Message not found");
+
+  // 2. 权限校验：是管理员 OR 是留言作者
+  const isAdmin = user.id === process.env.ADMIN_USER_ID;
+  const isOwner = message.userId === user.id;
+
+  if (!isAdmin && !isOwner) {
+    throw new Error("You don't have permission to delete this message");
+  }
+
+  // 3. 执行删除
+  await prisma.message.delete({ where: { id } });
+  
   revalidatePath("/guestbook");
 }
-
 // (如果需要，你可以仿照上面写 deleteComment)
 
 // ==========================================
@@ -106,43 +122,37 @@ export async function toggleLike(formData) {
   const user = await currentUser();
   if (!user) throw new Error("Unauthorized: 请先登录");
 
-  // 获取表单传来的 ID (三个里面只会有一个有值)
   const messageId = formData.get("messageId");
   const commentId = formData.get("commentId");
-  const postSlug = formData.get("postSlug");
+  const postSlug = formData.get("postSlug"); // 表单传来的 key
 
-  // 1. 定义查询条件 (Where) 和 创建数据 (Data)
   let whereClause = {};
   let dataClause = { userId: user.id };
   let path = "";
 
   if (messageId) {
-    // 目标：留言板留言
     whereClause = { userId_messageId: { userId: user.id, messageId } };
     dataClause.messageId = messageId;
     path = "/guestbook"; 
   } else if (commentId) {
-    // 目标：文章评论
     whereClause = { userId_commentId: { userId: user.id, commentId } };
     dataClause.commentId = commentId;
-    const currentSlug = formData.get("currentSlug"); // 为了刷新页面，评论点赞时需要把当前文章slug传回来
+    const currentSlug = formData.get("currentSlug");
     path = `/blog/${currentSlug}`;
   } else if (postSlug) {
-    // 目标：文章本身
-    whereClause = { userId_postSlug: { userId: user.id, postSlug } };
-    dataClause.postSlug = postSlug;
+    // 🚀 修复：根据报错提示，使用数据库索引字段 blogSlug 替换 postSlug
+    whereClause = { userId_blogSlug: { userId: user.id, blogSlug: postSlug } };
+    dataClause.blogSlug = postSlug;
     path = `/blog/${postSlug}`;
   }
 
-  // 2. 数据库操作
   const existingLike = await prisma.like.findUnique({ where: whereClause });
 
   if (existingLike) {
-    await prisma.like.delete({ where: { id: existingLike.id } }); // 取消赞
+    await prisma.like.delete({ where: { id: existingLike.id } });
   } else {
-    await prisma.like.create({ data: dataClause }); // 点赞
+    await prisma.like.create({ data: dataClause });
   }
 
-  // 3. 刷新页面
   revalidatePath(path);
 }

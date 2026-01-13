@@ -8,7 +8,7 @@ import { useLanguageStore } from "@/lib/store";
 import { dictionary } from "@/lib/dictionary";
 import LikeButton from "@/components/LikeButton";
 import MessageForm from "@/components/MessageForm";
-import { deleteComment } from "@/app/actions";
+import { deleteMessage } from "@/app/actions";
 import { MessageSquare, Trash2, ChevronUp, CornerDownRight, Loader2 } from "lucide-react";
 
 export default function MessageItem({ message, user, isAdmin }) {
@@ -32,7 +32,7 @@ export default function MessageItem({ message, user, isAdmin }) {
     if (!window.confirm(t?.deleteConfirm)) return; 
     setIsDeleting(true);
     try {
-      await deleteComment(id); 
+      await deleteMessage(id); 
     } catch (error) {
       alert(error.message || tForm?.error || "Error"); // 🚀 使用翻译
       setIsDeleting(false);
@@ -77,7 +77,7 @@ export default function MessageItem({ message, user, isAdmin }) {
               <MessageSquare size={14} /> {t?.reply}
             </button>
             {canDeleteRoot && (
-              <button onClick={() => handleDelete(message.id)} className="text-red-400 opacity-0 group-hover:opacity-100 transition-all ml-auto">
+              <button onClick={() => handleDelete(message.id)} className="flex items-center gap-1.5 text-xs text-red-400 opacity-0 group-hover:opacity-100 transition-all ml-auto">
                 {isDeleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />} {t?.delete}
               </button>
             )}
