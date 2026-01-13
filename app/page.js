@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 import SkillsBar from "@/components/SkillsBar";
 import RecentUpdate from "@/components/RecentUpdate";
 import BasisInfo from "@/components/BasicInfo";
+import PrefetchHandler from "@/components/PrefetchHandler";
 //import Spotify from "@/components/Spotify";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +19,8 @@ export default async function Page() {
       animate={{ opacity: 1 }}
       transition={{ duration: 2 }}
     >
+      <PrefetchHandler />
+      
       <section className="w-full mb-20 lg:w-2/3 min-h-[calc(100svh-500px)] flex items-center gap-20">
         <Hero />
       </section>
