@@ -19,7 +19,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="zh"
       className="scrollbar-thin scrollbar-thumb-muted-foreground scrollbar-track-muted"
     >
       <ClerkProviderWrapper>

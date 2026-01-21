@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 
 export default function HeroAnimation({ text1, text2, speed = 100 }) {
-  const [displayText, setDisplayText] = useState(text1);
-  const [currentIndex, setCurrentIndex] = useState(text1.length);
+  const [displayText, setDisplayText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [typeStatus, setTypeStatus] = useState("typing"); // To track typing vs deleting
   const [isText1, setIsText1] = useState(true); // Display text1 vs text2
   const [showCursor, setShowCursor] = useState(true); // For blinking cursor
