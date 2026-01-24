@@ -4,9 +4,9 @@ import SocialMediaLink from "./SocialMediaLink";
 function Socials() {
   return (
     <div className="flex gap-6 ">
-      <SocialMediaLink link="https://www.linkedin.com/in/zhihao-lin1/">
+      {/*<SocialMediaLink link="https://github.com/XD0N">
         <Linkedin />
-      </SocialMediaLink>
+      </SocialMediaLink>*/}
       <SocialMediaLink link="https://github.com/XD0N">
         <Github />
       </SocialMediaLink>
